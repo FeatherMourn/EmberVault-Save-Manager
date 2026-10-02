@@ -1,0 +1,1 @@
+"""EmberVault Save Manager module."""

@@ -1,0 +1,15 @@
+{
+  "id": "embervault.save-manager",
+  "name": "Save Manager",
+  "version": "0.1.0",
+  "publisher": "EmberVault",
+  "minimum_core_version": "1.0.0",
+  "capabilities": ["saves.inspect", "saves.backup", "saves.restore"],
+  "feature_state": "experimental",
+  "process_mode": "embedded",
+  "entrypoint": "src/module.py",
+  "contract_version": 1,
+  "safety": {"read_only": false, "requires_backup": true, "allowed_profiles": ["default", "research"]},
+  "recovery": {"rollback": "Restore the automatically created current-state backup.", "verification": "Verify both source backup and current-state backup before restore."},
+  "operation_types": ["save-inspection", "save-backup", "save-restore"]
+}
