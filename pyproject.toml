@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "embervault-save-manager"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "embervault-module-sdk @ git+https://github.com/FeatherMourn/EmberVault-Module-SDK.git"
+]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
