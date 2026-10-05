@@ -9,6 +9,23 @@ from .inspection import inspect_save_root
 from .inspection import is_within_root
 
 
+def build_recovery_evidence(operation_id: str, source_backup: str | Path,
+                            current_state_backup: str | Path, restored_target: str | Path,
+                            approved_root: str | Path) -> dict:
+    """Build a read-only recovery manifest for Control Center and Troubleshooter."""
+    paths = {"source_backup": Path(source_backup), "current_state_backup": Path(current_state_backup),
+             "restored_target": Path(restored_target)}
+    root = Path(approved_root)
+    if not operation_id.strip():
+        raise ValueError("A recovery operation ID is required.")
+    if any(not is_within_root(path, root) for path in paths.values()):
+        raise ValueError("Recovery evidence paths must remain inside the approved root.")
+    reports = {name: inspect_save_root(path).to_dict() for name, path in paths.items()}
+    return {"schema_version": 1, "operation_id": operation_id, "approved_root": str(root),
+            "sources": reports, "validated": all(report["state"] == "ready" for report in reports.values()),
+            "mutated_files": False}
+
+
 def validate_copy(source: str | Path, destination: str | Path, expected_files: tuple[str, ...]) -> bool:
     source_report = inspect_save_root(source, expected_files)
     destination_report = inspect_save_root(destination, expected_files)

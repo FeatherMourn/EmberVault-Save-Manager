@@ -6,6 +6,9 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext
 from src.module import plan_backup, plan_restore
+from src.recovery import build_recovery_evidence
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from src.inspection import inspect_save_root, is_within_root
 from src.backup_plan import plan_backup as create_backup_plan
 from src.operation_rules import authorize_operation
@@ -347,6 +350,19 @@ class SaveManagerTests(unittest.TestCase):
         context = ModuleContext("embervault.save-manager", "default", "EV-OP-2", "approved", "EV-BACKUP-CURRENT")
         self.assertEqual(plan_restore(context, "EV-BACKUP-SOURCE", True).status, "ready")
         self.assertEqual(plan_restore(context, "EV-BACKUP-SOURCE", False).status, "blocked")
+
+    def test_recovery_evidence_is_read_only_and_path_scoped(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("source", "current", "restored"):
+                folder = root / name
+                folder.mkdir()
+                (folder / "save.dat").write_bytes(b"save")
+            evidence = build_recovery_evidence("EV-REC-1", root / "source", root / "current", root / "restored", root)
+            self.assertTrue(evidence["validated"])
+            self.assertFalse(evidence["mutated_files"])
+            with self.assertRaises(ValueError):
+                build_recovery_evidence("EV-REC-2", root / "source", root / "current", root.parent / "outside", root)
 
 
 if __name__ == "__main__":

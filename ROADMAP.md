@@ -86,7 +86,7 @@ restore, import, export, and view save history.
 - [ ] Expose rolling-save history as a readable rollback view
 - [x] Verify the result after each operation
 - [x] Provide one-click rollback when validation fails
-- [ ] Preserve recovery evidence for Control Center and Troubleshooter
+- [x] Preserve recovery evidence for Control Center and Troubleshooter
 
 ## Milestone 4 — World metadata editing
 
