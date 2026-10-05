@@ -9,6 +9,7 @@ from src.module import plan_backup, plan_restore
 from src.recovery import build_recovery_evidence
 from src.compatibility import assess_save_format
 from src.discovery import rolling_copy_history
+from src.validation_gate import request_validation
 from src.world_model import SaveSource
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -389,6 +390,13 @@ class SaveManagerTests(unittest.TestCase):
             self.assertEqual(len(history), 2)
             self.assertEqual(sum(item["active"] for item in history), 1)
             self.assertTrue(all(len(item["sha256"]) == 64 for item in history))
+
+    def test_real_save_validation_requires_all_opt_ins(self):
+        self.assertFalse(request_validation(False, True, "backup", "fixture").allowed)
+        self.assertFalse(request_validation(True, False, "backup", "fixture").allowed)
+        self.assertFalse(request_validation(True, True, None, "fixture").allowed)
+        allowed = request_validation(True, True, "backup", "fixture")
+        self.assertTrue(allowed.allowed)
 
 
 if __name__ == "__main__":
