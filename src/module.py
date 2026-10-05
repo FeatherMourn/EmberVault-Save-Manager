@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 from embervault_sdk import ModuleContext, ModuleResult
+from .inspection import inspect_save_root
 
 MODULE_ID = "embervault.save-manager"
 
 
 def describe() -> dict:
-    return {"id": MODULE_ID, "execution": "embedded", "application_state": "backup-gated", "mutates_saves": True}
+    return {"id": MODULE_ID, "execution": "embedded", "application_state": "managed", "mutates_saves": True}
+
+
+def inspect(context: ModuleContext, save_root: str, expected_paths: tuple[str, ...] = ()) -> ModuleResult:
+    if context.module_id != MODULE_ID or not context.profile_id:
+        return ModuleResult("blocked", "Save Manager requires a profile-scoped context.")
+    report = inspect_save_root(save_root, expected_paths)
+    return ModuleResult(report.state, "Save inspection completed.", report.to_dict())
 
 
 def plan_backup(context: ModuleContext, label: str) -> ModuleResult:
