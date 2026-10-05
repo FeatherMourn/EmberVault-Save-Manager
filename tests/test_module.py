@@ -372,9 +372,11 @@ class SaveManagerTests(unittest.TestCase):
             known.write_text('{"format_version": 1}', encoding="utf-8")
             binary = root / "world.sav"
             binary.write_bytes(b"fixture")
+            unknown = root / "unknown.bin"
+            unknown.write_bytes(b"fixture")
             self.assertEqual(assess_save_format(known).state, "ready")
             self.assertEqual(assess_save_format(binary).state, "partial")
-            self.assertEqual(assess_save_format(root / "unknown.bin").state, "unsupported")
+            self.assertEqual(assess_save_format(unknown).state, "unsupported")
 
 
 if __name__ == "__main__":
