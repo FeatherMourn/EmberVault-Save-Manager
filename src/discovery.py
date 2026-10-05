@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from hashlib import sha256
 from pathlib import Path
 
 from .world_model import SaveSource, WorldSave
@@ -66,3 +67,18 @@ def discover_worlds(source: SaveSource) -> tuple[WorldSave, ...]:
                                 health, max(path.stat().st_mtime_ns for path in groups[identity]),
                                 _active_copy(root, identity)))
     return tuple(worlds)
+
+
+def rolling_copy_history(source: SaveSource, world_id: str) -> tuple[dict, ...]:
+    """Return read-only history metadata for files belonging to one world."""
+    root = Path(source.root)
+    if not root.is_dir() or not WORLD_ID.fullmatch(world_id):
+        return tuple()
+    candidates = [path for path in root.iterdir() if path.is_file() and _world_id(path) == world_id]
+    history = []
+    for path in sorted(candidates, key=lambda item: (item.stat().st_mtime_ns, item.name)):
+        data = path.read_bytes()
+        history.append({"file": path.name, "relative_path": path.name, "size": len(data),
+                        "modified_ns": path.stat().st_mtime_ns, "sha256": sha256(data).hexdigest(),
+                        "active": path.name == world_id})
+    return tuple(history)

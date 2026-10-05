@@ -83,7 +83,7 @@ restore, import, export, and view save history.
 - [x] Create timestamped backups before every mutation
 - [x] Record source and destination manifests and hashes
 - [x] Validate expected files and destination identity
-- [ ] Expose rolling-save history as a readable rollback view
+- [x] Expose rolling-save history as a readable rollback view
 - [x] Verify the result after each operation
 - [x] Provide one-click rollback when validation fails
 - [x] Preserve recovery evidence for Control Center and Troubleshooter

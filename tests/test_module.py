@@ -8,6 +8,8 @@ from embervault_sdk import ModuleContext
 from src.module import plan_backup, plan_restore
 from src.recovery import build_recovery_evidence
 from src.compatibility import assess_save_format
+from src.discovery import rolling_copy_history
+from src.world_model import SaveSource
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from src.inspection import inspect_save_root, is_within_root
@@ -377,6 +379,16 @@ class SaveManagerTests(unittest.TestCase):
             self.assertEqual(assess_save_format(known).state, "ready")
             self.assertEqual(assess_save_format(binary).state, "partial")
             self.assertEqual(assess_save_format(unknown).state, "unsupported")
+
+    def test_rolling_copy_history_is_read_only_and_hashed(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "3ad85aea").write_bytes(b"current")
+            (root / "3ad85aea.backup").write_bytes(b"older")
+            history = rolling_copy_history(SaveSource("local", "local", str(root), True), "3ad85aea")
+            self.assertEqual(len(history), 2)
+            self.assertEqual(sum(item["active"] for item in history), 1)
+            self.assertTrue(all(len(item["sha256"]) == 64 for item in history))
 
 
 if __name__ == "__main__":
