@@ -10,5 +10,8 @@ dependencies = [
   "embervault-module-sdk @ git+https://github.com/FeatherMourn/EmberVault-Module-SDK.git"
 ]
 
+[project.scripts]
+embervault-save-manager = "src.cli:main"
+
 [tool.setuptools.packages.find]
 include = ["src*"]
