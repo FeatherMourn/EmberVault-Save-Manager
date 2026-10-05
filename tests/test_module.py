@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from embervault_sdk import ModuleContext
 from src.module import plan_backup, plan_restore
 from src.recovery import build_recovery_evidence
+from src.compatibility import assess_save_format
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from src.inspection import inspect_save_root, is_within_root
@@ -363,6 +364,17 @@ class SaveManagerTests(unittest.TestCase):
             self.assertFalse(evidence["mutated_files"])
             with self.assertRaises(ValueError):
                 build_recovery_evidence("EV-REC-2", root / "source", root / "current", root.parent / "outside", root)
+
+    def test_format_assessment_is_conservative(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            known = root / "world_info.json"
+            known.write_text('{"format_version": 1}', encoding="utf-8")
+            binary = root / "world.sav"
+            binary.write_bytes(b"fixture")
+            self.assertEqual(assess_save_format(known).state, "ready")
+            self.assertEqual(assess_save_format(binary).state, "partial")
+            self.assertEqual(assess_save_format(root / "unknown.bin").state, "unsupported")
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ Inspect -> Back up -> Preview -> Apply -> Validate -> Roll back if needed
 
 - [x] Define the minimum viable product and explicitly defer nonessential features
 - [x] Document supported Windows, Steam Cloud, and dedicated-server scenarios
-- [ ] Establish save-format compatibility and version-detection rules
+- [x] Establish conservative save-format compatibility and version-detection rules
 - [x] Define behavior for unsupported, damaged, partial, and legacy saves
 - [x] Design confirmations, previews, undo, rollback, and recovery messaging
 - [x] Separate file operations, save parsing, validation, and UI components
