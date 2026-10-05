@@ -19,7 +19,8 @@ from src.characters import (character_edit_supported, discover_character_contain
                             export_character, import_character)
 from src.cli import main as cli_main
 from src.packages import export_world, import_world, inspect_package
-from src.ui import _dispatch_selected, confirm_operation, create_world_library, request_operation_destination
+from src.ui import (_dispatch_selected, WorldLibraryController, confirm_operation,
+                    create_world_library, request_operation_destination)
 from src.blob_inventory import inventory_bytes
 from src.format_analysis import compare_headers
 from src.character_analysis import inspect_character_payloads
@@ -168,6 +169,25 @@ class SaveManagerTests(unittest.TestCase):
 
     def test_ui_operation_destination_is_not_requested_for_metadata_rename(self):
         self.assertIsNone(request_operation_destination(None, "rename"))
+
+    def test_ui_controller_previews_confirms_and_dispatches_action(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory) / "saves"
+            destination = Path(directory) / "backup"
+            root.mkdir()
+            destination.mkdir()
+            (root / "3ad85aea").write_bytes(b"world")
+            world = discover_worlds(SaveSource("local", "local", str(root), True, "ready"))[0]
+            received = []
+            controller = WorldLibraryController(
+                None, (SaveSource("local", "local", str(root), True, "ready"),), received.append,
+                destination_picker=lambda _parent, _action: str(destination),
+                confirmer=lambda _parent, _action, _name, text: "Estimated size" in text,
+            )
+            request = controller.handle("backup", world.world_id)
+            self.assertIsNotNone(request)
+            self.assertEqual(received[0].action, "backup")
+            self.assertEqual(received[0].preview.estimated_size, 5)
 
     def test_blob_inventory_is_read_only_and_requires_ksc1(self):
         payload = b"KSC1" + b"EXTS" + b"xxxx" + b"SRSG" + b"CHAR"
